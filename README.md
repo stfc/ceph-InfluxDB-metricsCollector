@@ -1,7 +1,7 @@
 #ceph-influxDB-metricsCollector
 By Ignacy Debicki
 
-This is a script to collect data about ceph and send it to influxDB >= v0.9.x
+######This is a script to collect data about ceph and send it to influxDB >= v0.9.x
 
 ######Recommended python version of >=2.6.7
 ######Has been tested and works correctly on verison 2.6.6, however, optimisations in the json module are not implemented, so parsing json files takes significantly longer.
@@ -32,11 +32,11 @@ Also please ensure python has theese libraries:
 
 ##Installation & configuration:
 
-1.Download this repository wherever you want to have it.
-2.Configure the scripts using the single ceph-influxDB-metricsCollector.ini config file
-3.Crate directory /var/log/ceph-influxdb-metricsCollector
-3.Make sure the user the scripts are going to be ran by can read and write in the desired log location and the plugins directory in the package.
-4.Schedual the loader.py to run at your desired interval by creating a CRON job. For testing, you can just run plugins/./runLoop.py, which will run the scripts at the start of every minute. For one time runs, you can use plugins/./loader.py
+1. Download this repository wherever you want to have it.
+2. Configure the scripts using the single ceph-influxDB-metricsCollector.ini config file
+3. Crate directory /var/log/ceph-influxdb-metricsCollector
+3. Make sure the user the scripts are going to be ran by can read and write in the desired log location and the plugins directory in the package.
+4. Schedual the loader.py to run at your desired interval by creating a CRON job. For testing, you can just run plugins/./runLoop.py, which will run the scripts at the start of every minute. For one time runs, you can use plugins/./loader.py
 
 ##Hotswapping plugins:
 
