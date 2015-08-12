@@ -1,0 +1,40 @@
+Structure of the tagging system.
+The tag type is used to determine what other tags will be contained in that point.
+This is to make it easier to create queries in grafana, however if wanted it can be omitted.
+It is important to remember that tags act as descriptors, not absolute paths, so you do not need to necessarily use all of them to describe what you are looking for. 
+
+Type
+|
+----General
+|	|
+|	----Metric
+|
+----OSD
+|	|
+|	----Rack
+|	|
+|	----Host
+|	|
+|	----OSD(ID)
+|	|
+|	----Metric
+|
+----PG
+|	|
+|	----Pool(ID)
+|	|
+|	----State
+|	|
+|	----PG(ID)
+|	|
+|	----Metric
+|
+----Pool
+|	|
+|	----dataProtectionType(Erasure coding, replication etc.)
+|	|
+|	----Pool(ID)
+|	|
+|	----Metric
+|
+--------------------------------------------------------------------
