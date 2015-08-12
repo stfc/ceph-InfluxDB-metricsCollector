@@ -92,7 +92,7 @@ def main():
 			keyring=argList[1]
 			if c=='none':
 				c=None
-			if k=='none':
+			if keyring=='none':
 				keyring=None
 			clusters[k]={'conf':c,'keyring':keyring}
 		#hosts
@@ -189,7 +189,7 @@ def main():
 							points.extend(pointsReturned)
 							logger.info('Finished executing plugin "{0}"'.format(p))
 						except Exception as exc:
-							logger.error('Plugin "{0}" failed to run: {1} :: {3}'.format(p,exc,traceback.format_exc()))
+							logger.error('Plugin "{0}" failed to run: {1} :: {2}'.format(p,exc,traceback.format_exc()))
 						
 					else:
 						logger.debug('Class "{0}" does not inherit from base.Base'.format(name))

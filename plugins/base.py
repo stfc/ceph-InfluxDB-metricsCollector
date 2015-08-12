@@ -67,14 +67,15 @@ class Base(object):
 		self.logger.info('Executing command:{0}'.format(args))
 		output = ''
 		if args[0]=='ceph':
+			args=list(args)
 			#add path to key and config if non default is specified
 			if not self.clusterKey==None:
-				args.insert(1,'-c')
-				args.insert(2,self.clusterConf)
+				args.insert(1,'-k')
+				args.insert(2,self.clusterKey)
 			if not self.clusterConf==None:
 				args.insert(1,'-c')
 				args.insert(2,self.clusterConf)
-
+		args=tuple(args)
 		try:
 			output = os.popen2(' '.join(args))[1].read()
 		except Exception as exc:
