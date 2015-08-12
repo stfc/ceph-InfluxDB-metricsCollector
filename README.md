@@ -40,16 +40,16 @@ Also please ensure python has these libraries:
 
 ##Hotswapping plugins:
 
-You can switch plugins whilst the program is running by turning them off or on in the configursiton file
+You can switch plugins whilst the program is running by turning them off or on in the configuration file.
 If altering or changing the code of a plugin please remember to delete its corresponding .pyc file.
 
 ##Documentation:
 
-The documentation folder contains some useful information about the way items are tagged, and a spreadsheet showing the sources of all metrics and a small calculator which estimates the number of points that are gathered with each run.
+The documentation folder contains some useful information about the way items are tagged, and a spreadsheet showing the sources of all metrics with a small calculator which estimates the number of points that are gathered with each run.
 
 ##Creating plugins:
 
-All plugin classes must inherit from base.Base and implement the function `gather_metrics()`, which will return an array of all the measurements
+All plugin classes must inherit from `base.Base` and implement the function `gather_metrics()`, which will return an array of all the measurements
 To log events in your plugin, use `self.logger.` followed by the logging level this should show up under as defined by the logging library
 e.g. `self.logger.info('Gathering metrics')`
 
@@ -62,7 +62,7 @@ if `isJson = True`, the command will return a python dictionary from the parsed 
 If parsing a JSON which is not retrived from a command, please use `self.readJson(jsonFile)`, as the result will be memoized.
 
 To encode a measurement into a point, use `self.create_measurement(tags,fields)`
-The built in methods, of escaping data can slow the system significantly whe nprocessing a large amount of points (~1 second extra per 100,000 points).
+The built in methods, of escaping data can slow the system significantly when processing a large amount of points (~1 second extra per 100,000 points).
 Due to this, they are commented out in influxLineProtocol.py, however can be commented back in if you require this functionality.
 ######Furthermore, please make sure your passed in values for fields can be formatted as floats.
 
