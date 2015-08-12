@@ -1,15 +1,16 @@
-#ceph-influxDB-metricsCollector By Ignacy Debicki
+#ceph-influxDB-metricsCollector
+By Ignacy Debicki
 
 This is a script to collect data about ceph and send it to influxDB >= v0.9.x
 
-Recommended python version of >=2.6.7
-Has been tested and works correctly on verison 2.6.6, however, optimisations in the json module are not implemented, so parsing json files takes significantly longer.
+######Recommended python version of >=2.6.7
+######Has been tested and works correctly on verison 2.6.6, however, optimisations in the json module are not implemented, so parsing json files takes significantly longer.
 
 
 To run it has the following dependencies:
 
 * [influxdb-python](https://github.com/influxdb/influxdb-python)
-* [Requests](http://docs.python-requests.org/)
+  * [Requests](http://docs.python-requests.org/)
 
 Also please ensure python has theese libraries:
 
@@ -27,7 +28,7 @@ Also please ensure python has theese libraries:
 * cStringIO
 * time
 
-Furthermore, you will require a ceph keychain on the machine this script will be running on.
+######Furthermore, you will require a ceph keychain on the machine this script will be running on.
 
 ##Installation & configuration:
 
@@ -48,22 +49,22 @@ The documentation folder contains some useful information about the way items ar
 
 ##Creating plugins:
 
-All plugin classes must inherit from base.Base and implement the function gather_metrics(), which will return an array of all the measurements
-To log events in your plugin, use 'self.logger.' followed by the logging level this should show up under as defined by the logging library
-e.g. 'self.logger.info('Gathering metrics')'
+All plugin classes must inherit from base.Base and implement the function `gather_metrics()`, which will return an array of all the measurements
+To log events in your plugin, use `self.logger.` followed by the logging level this should show up under as defined by the logging library
+e.g. `self.logger.info('Gathering metrics')`
 
 Please see example.py for an example plugin structure.
 
-To call commands use the function self.execute_command(isJson,*args) as the results of these operations are memoized, so multiple plugins calling and parsing the same command is not as resource intensive.
-e.g. self.execute_command(True,'ceph','osd','tree','--format','json')
-if isJson = True, the command will return a python dictionary from the parsed JSON. 
+To call commands use the function `self.execute_command(isJson,*args)` as the results of these operations are memoized, so multiple plugins calling and parsing the same command is not as resource intensive.
+e.g. `self.execute_command(True,'ceph','osd','tree','--format','json')`
+if `isJson = True`, the command will return a python dictionary from the parsed JSON. 
 
-If parsing a JSON which is not retrived from a command, please use self.readJson(jsonFile), as the result will be memoized.
+If parsing a JSON which is not retrived from a command, please use `self.readJson(jsonFile)`, as the result will be memoized.
 
-To encode a measurement into a point, use self.create_measurement(tags,fields)
+To encode a measurement into a point, use `self.create_measurement(tags,fields)`
 The built in methods, of escaping data can slow the system significantly whe nprocessing a large amount of points (~1 second extra per 100,000 points).
 Due to this, they are commented out in influxLineProtocol.py, however can be commented back in if you require this functionality.
-Furthermore, please make sure your passed in values for fields can be formatted as floats.
+######Furthermore, please make sure your passed in values for fields can be formatted as floats.
 
 N.B. when testing plugins and the source code is changed, but the change is not reflected when running it, please delete the script's corresponding .pyc file.
 
