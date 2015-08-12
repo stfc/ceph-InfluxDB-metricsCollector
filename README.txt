@@ -37,12 +37,12 @@ Installation & configuration:
 
 Hotswapping plugins:
 
-You can switch plugins whilst the program is running by turning them off or on in the configursiton file
+You can switch plugins whilst the program is running by turning them off or on in the configuration file.
 If altering or changing the code of a plugin please remember to delete its corresponding .pyc file.
 
 Documentation:
 
-The documentation folder contains some useful information about the way items are tagged, and a spreadsheet showing the sources of all metrics and a small calculator which estimates the number of points that are gathered with each run.
+The documentation folder contains some useful information about the way items are tagged, and a spreadsheet showing the sources of all metrics with a small calculator which estimates the number of points that are gathered with each run.
 
 Creating plugins:
 
