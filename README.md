@@ -69,4 +69,4 @@ Due to this, they are commented out in influxLineProtocol.py, however can be com
 N.B. when testing plugins and the source code is changed, but the change is not reflected when running it, please delete the script's corresponding .pyc file.
 
 To enable the plugin, just add into the config file under plugins:
-pluginName=True
+`pluginName=True`
