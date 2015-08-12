@@ -164,7 +164,7 @@ def main():
 	#create empty list for all points
 	cache={}
 	points=[]
-	for cluster,clusterDict in clusters:
+	for cluster,clusterDict in clusters.iteritems():
 		logger.info('Retrieving metrics from cluster "{0}"'.format(cluster))
 		for p in plugins:
 			#load plugin
