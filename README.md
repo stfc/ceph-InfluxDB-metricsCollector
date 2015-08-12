@@ -8,24 +8,24 @@ Has been tested and works correctly on verison 2.6.6, however, optimisations in 
 
 To run it has the following dependencies:
 
-*[influxdb-python](https://github.com/influxdb/influxdb-python)
-*[Requests](http://docs.python-requests.org/)
+* [influxdb-python](https://github.com/influxdb/influxdb-python)
+* [Requests](http://docs.python-requests.org/)
 
 Also please ensure python has theese libraries:
 
-*os	
-*imp
-*ConfigParser
-*inspect
-*logging
-*sys
-*traceback
-*json
-*collections
-*functools
-*gzip
-*cStringIO
-*time
+* os	
+* imp
+* ConfigParser
+* inspect
+* logging
+* sys
+* traceback
+* json
+* collections
+* functools
+* gzip
+* cStringIO
+* time
 
 Furthermore, you will require a ceph keychain on the machine this script will be running on.
 
