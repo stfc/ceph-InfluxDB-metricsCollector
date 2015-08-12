@@ -10,7 +10,7 @@ To run it has the following dependencies:
     |
     -->[Requests](http://docs.python-requests.org/)
 
-Also please ensure python has theese libraries:
+Also please ensure python has these libraries:
 -os	
 -imp
 -ConfigParser
