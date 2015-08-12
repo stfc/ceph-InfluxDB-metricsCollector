@@ -1,4 +1,5 @@
-ceph-influxDB-metricsCollector By Ignacy Debicki
+#ceph-influxDB-metricsCollector By Ignacy Debicki
+
 This is a script to collect data about ceph and send it to influxDB >= v0.9.x
 
 Recommended python version of >=2.6.7
@@ -7,28 +8,28 @@ Has been tested and works correctly on verison 2.6.6, however, optimisations in 
 
 To run it has the following dependencies:
 
-.*[influxdb-python](https://github.com/influxdb/influxdb-python)
-    ..*[Requests](http://docs.python-requests.org/)
+*[influxdb-python](https://github.com/influxdb/influxdb-python)
+*[Requests](http://docs.python-requests.org/)
 
 Also please ensure python has theese libraries:
 
--os	
--imp
--ConfigParser
--inspect
--logging
--sys
--traceback
--json
--collections
--functools
--gzip
--cStringIO
--time
+*os	
+*imp
+*ConfigParser
+*inspect
+*logging
+*sys
+*traceback
+*json
+*collections
+*functools
+*gzip
+*cStringIO
+*time
 
 Furthermore, you will require a ceph keychain on the machine this script will be running on.
 
-Installation & configuration:
+##Installation & configuration:
 
 1.Download this repository wherever you want to have it.
 2.Configure the scripts using the single ceph-influxDB-metricsCollector.ini config file
@@ -36,16 +37,16 @@ Installation & configuration:
 3.Make sure the user the scripts are going to be ran by can read and write in the desired log location and the plugins directory in the package.
 4.Schedual the loader.py to run at your desired interval by creating a CRON job. For testing, you can just run plugins/./runLoop.py, which will run the scripts at the start of every minute. For one time runs, you can use plugins/./loader.py
 
-Hotswapping plugins:
+##Hotswapping plugins:
 
 You can switch plugins whilst the program is running by turning them off or on in the configursiton file
 If altering or changing the code of a plugin please remember to delete its corresponding .pyc file.
 
-Documentation:
+##Documentation:
 
 The documentation folder contains some useful information about the way items are tagged, and a spreadsheet showing the sources of all metrics and a small calculator which estimates the number of points that are gathered with each run.
 
-Creating plugins:
+##Creating plugins:
 
 All plugin classes must inherit from base.Base and implement the function gather_metrics(), which will return an array of all the measurements
 To log events in your plugin, use 'self.logger.' followed by the logging level this should show up under as defined by the logging library
