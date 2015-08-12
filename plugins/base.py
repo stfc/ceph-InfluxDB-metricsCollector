@@ -50,13 +50,10 @@ class memoized(object):
 
 class Base(object):
 
-	def __init__(self,cluster,cache,timestamp):
+	def __init__(self,cluster,cache,timestamp,c,k):
 		self.cluster=cluster
-		self.user=''
-		self.password=''
-		self.db=''
-		self.host=''
-		self.port=8086
+		self.clusterConf=c
+		self.clusterKey=k
 		#get application self.logger
 		self.logger = logging.getLogger('ceph-influxDB-metricsCollector')
 		#set cache
@@ -69,7 +66,15 @@ class Base(object):
 		#call command
 		self.logger.info('Executing command:{0}'.format(args))
 		output = ''
-		
+		if args[0]=='ceph':
+			#add path to key and config if non default is specified
+			if not self.clusterKey==None:
+				args.insert(1,'-c')
+				args.insert(2,self.clusterConf)
+			if not self.clusterConf==None:
+				args.insert(1,'-c')
+				args.insert(2,self.clusterConf)
+
 		try:
 			output = os.popen2(' '.join(args))[1].read()
 		except Exception as exc:

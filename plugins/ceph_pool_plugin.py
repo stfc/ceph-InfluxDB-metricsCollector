@@ -1,10 +1,10 @@
 import base
 
 class CephPluginPoolData(base.Base):
-	def __init__(self,cluster,cache,timestamp):
+	def __init__(self,cluster,cache,timestamp,c,k):
 		#initialise
 
-		base.Base.__init__(self,cluster,cache,timestamp)
+		base.Base.__init__(self,cluster,cache,timestamp,c,k)
 		#create dictionary to find data protection types of different pools
 		self.poolDPType={}
 		#create array of all statistics to fetch from pg dump

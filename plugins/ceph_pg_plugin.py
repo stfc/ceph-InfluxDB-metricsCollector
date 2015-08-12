@@ -1,9 +1,9 @@
 import base
 
 class CephPGPlugin(base.Base):
-	def __init__(self,cluster,cache,timestamp):
+	def __init__(self,cluster,cache,timestamp,c,k):
 		#initialise
-		base.Base.__init__(self,cluster,cache,timestamp)
+		base.Base.__init__(self,cluster,cache,timestamp,c,k)
 
 	def gather_metrics(self):
 		self.logger.info('Gathering metrics')

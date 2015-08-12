@@ -67,7 +67,7 @@ def main():
 	plugins=[]
 
 	#create variables for config
-	cluster = ''
+	clusters = {}
 	host = ''
 	port = ''
 	db = ''
@@ -85,7 +85,16 @@ def main():
 		config.readfp(open(ini_file))
 		#try to read config file
 		#reporting
-		cluster = config.get('reporting','cluster')
+		for k,v in config.items('reporting'):
+			#split list of conf,keyring by comma
+			argList=v.split(',')
+			c=argList[0]
+			keyring=argList[1]
+			if c=='none':
+				c=None
+			if k=='none':
+				keyring=None
+			clusters[k]={'conf':c,'keyring':keyring}
 		#hosts
 		host = config.get('connection','host')
 		port = config.get('connection','port')
@@ -155,40 +164,42 @@ def main():
 	#create empty list for all points
 	cache={}
 	points=[]
-	for p in plugins:
-		#load plugin
-		plugin = loadPlugin(p)
-		if not plugin == None:
-			#find all classes in module
-			clsmembers = inspect.getmembers(plugin, inspect.isclass)
-			found = False
-			#iterate through classes in module to find classes that inherit from base.Base
-			for i in range(0,len(clsmembers)):
-				name,cls = clsmembers[i]
-				if issubclass(cls,base.Base):
-					try:
-						#create timestamp for plugin
-						ts = int(round(time.time() * 1000))
-						found = True
-						#found class that inherits from base. Create instance
-						instance = cls(cluster,cache,ts)
-						#Tell the plugin to collect information. Append the metrics collected to the points to be sent
-						pointsReturned=instance.gather_metrics()
-						logger.info('Plugin "{0}" created {1} points'.format(p,len(pointsReturned)))
-						points.extend(pointsReturned)
-						logger.info('Finished executing plugin "{0}"'.format(p))
-					except Exception as exc:
-						logger.error('Plugin "{0}" failed to run: {1} :: {3}'.format(p,exc,traceback.format_exc()))
-					
-				else:
-					logger.debug('Class "{0}" does not inherit from base.Base'.format(name))
+	for cluster,clusterDict in clusters:
+		logger.info('Retrieving metrics from cluster "{0}"'.format(cluster))
+		for p in plugins:
+			#load plugin
+			plugin = loadPlugin(p)
+			if not plugin == None:
+				#find all classes in module
+				clsmembers = inspect.getmembers(plugin, inspect.isclass)
+				found = False
+				#iterate through classes in module to find classes that inherit from base.Base
+				for i in range(0,len(clsmembers)):
+					name,cls = clsmembers[i]
+					if issubclass(cls,base.Base):
+						try:
+							#create timestamp for plugin
+							ts = int(round(time.time() * 1000))
+							found = True
+							#found class that inherits from base. Create instance
+							instance = cls(cluster,cache,ts,clusterDict['conf'],clusterDict['keyring'])
+							#Tell the plugin to collect information. Append the metrics collected to the points to be sent
+							pointsReturned=instance.gather_metrics()
+							logger.info('Plugin "{0}" created {1} points'.format(p,len(pointsReturned)))
+							points.extend(pointsReturned)
+							logger.info('Finished executing plugin "{0}"'.format(p))
+						except Exception as exc:
+							logger.error('Plugin "{0}" failed to run: {1} :: {3}'.format(p,exc,traceback.format_exc()))
+						
+					else:
+						logger.debug('Class "{0}" does not inherit from base.Base'.format(name))
 
 
-			if not found:
-				logger.warning('Plugin "{0}" not executed. Did not find any classes that inherit from base.Base'.format(p))
+				if not found:
+					logger.warning('Plugin "{0}" not executed. Did not find any classes that inherit from base.Base'.format(p))
 
-		else:
-			logger.warning('Could not load plugin: "{0}"'.format(p))
+			else:
+				logger.warning('Could not load plugin: "{0}"'.format(p))
 		
 	logger.info('Total points collected: {0}'.format(len(points)))
 	try:
