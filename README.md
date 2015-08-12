@@ -7,8 +7,8 @@ Has been tested and works correctly on verison 2.6.6, however, optimisations in 
 
 To run it has the following dependencies:
 -[influxdb-python](https://github.com/influxdb/influxdb-python)
+
     |
-    
     -->[Requests](http://docs.python-requests.org/)
 
 Also please ensure python has theese libraries:
