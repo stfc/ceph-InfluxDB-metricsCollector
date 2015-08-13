@@ -130,16 +130,8 @@ def main():
 		loggingPath = os.path.join(script_dir,loggingPath[16:])
 
 	#format the value of level into the ENUM equivalent
-	if loggingLevel == 'DEBUG':
-		loggingLevel = logging.DEBUG
-	elif loggingLevel == 'INFO':
-		loggingLevel = logging.INFO
-	elif loggingLevel == 'WARNING':
-		loggingLevel = logging.WARNING
-	elif loggingLevel == 'ERROR':
-		loggingLevel = logging.ERROR
-	elif loggingLevel == 'CRITICAL':
-		loggingLevel = logging.CRITICAL
+	if loggingLevel in ('DEBUG','INFO','WARNING','ERROR','CRITICAL'):
+		loggingLevel = logging.__getattribute__(loggingLevel)
 	else:
 		#anything else set to default
 		logger.warning('Could not understand logging option: "{0}". Defaulting to level WARNING'.format(loggingLevel))
