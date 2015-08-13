@@ -159,13 +159,14 @@ def main():
 	logger.addHandler(handler)
 	logger.setLevel(loggingLevel)
 	logger.propagate = False
-	#Make sure cache did not persist from previous run
-	reload(base)
+	
 	logger.info('-----------------------Starting script------------------------')
 	#create empty list for all points
-	cache={}
 	points=[]
 	for cluster,clusterDict in clusters.iteritems():
+		cache={}
+		#Make sure cache did not persist from previous run
+		reload(base)
 		logger.info('Retrieving metrics from cluster "{0}"'.format(cluster))
 		for p,clusterSet in plugins.iteritems():
 			if cluster in clusterSet:
@@ -203,7 +204,6 @@ def main():
 				else:
 					logger.warning('Could not load plugin: "{0}"'.format(p))
 		logger.info('Finished retrieving metrics for cluster "{0}"'.format(cluster))
-		
 	logger.info('Total points collected: {0}'.format(len(points)))
 	try:
 		

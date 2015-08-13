@@ -27,24 +27,28 @@ class CephPluginOSDStates(base.Base):
 		'''
 		#run ceph command
 		self.logger.info('Getting storage info')
-		output = self.execute_command(True,'ceph','osd','tree','--format','json')
+		output = self.execute_command(True,'ceph','osd','dump','--format','json')
 
 		if output == None:
-			self.logger.error('No output recieved from "ceph osd tree --format json"')
+			self.logger.error('No output recieved from "ceph osd dump --format json"')
 			return []
 		points=[]
 		#get osd data
-		for o in output['nodes']:
-			if o['type']=='osd':
-				osdID=o['id']
-				osdParents = osdHierarchy[osdID]
-				#from status and exists create the state measurement
-				state = o['status']+'+'
-				if o['exists'] == 1:
-					state+='in'
-				else:
-					state+='out'
-				points.append(self.create_osd_measurement(osdParents['rack'],osdParents['host'],osdID,state,1))
+		for o in output['osds']:
+			osdID=o['osd']
+			osdParents = osdHierarchy[osdID]
+			#from status and exists create the state measurement
+			state = ''
+			if o['up'] == 1:
+				state = 'up+'
+			else:
+				state = 'down+'
+
+			if o['in'] == 1:
+				state+='in'
+			else:
+				state+='out'
+			points.append(self.create_osd_measurement(osdParents['rack'],osdParents['host'],osdID,state,1))
 
 		return points
 
