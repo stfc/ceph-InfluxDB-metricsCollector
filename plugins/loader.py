@@ -140,7 +140,7 @@ def main(configFile=defaultConf):
 
 		try:
 			#make path to the log file
-			options['loggingPath'] = os.path.join(options['loggingPath'],'ceph-influxDB-metricsCollector.log')
+			options['loggingPath'] = os.path.join(options['loggingPath'],'ceph-influxdb-metricsCollector.log')
 			#get logger
 			logger = createLogger(options['loggingPath'],loggingLevel=options['loggingLevel'])
 		except Exception as e:
