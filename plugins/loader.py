@@ -11,8 +11,39 @@ import gzip
 import cStringIO
 import traceback
 import time
+import sys
 
-def main():
+#get location of default configuration file
+script_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+rel_path = "conf/default.conf"
+defaultConf = os.path.join(script_dir, rel_path)
+
+def parseArgs():
+	confPath = defaultConf
+	versionInfo = sys.version_info
+	if versionInfo[0] <= 6 and versionInfo[0] == 2:
+		#if version is 2.6.x use optparse
+		from optparse import OptionParser
+		parser = OptionParser()
+		parser.add_option('-c','--config', dest='configPath',help='The FILE the config should be read from. By default reads from etc/ceph-influxDB-metricsCollector/ceph-influxDB-metricsCollector.conf',metavar='FILE')
+		options, args = parser.parse_args()
+		options=options.__dict__
+	else:
+		#if version is newer use argparse
+		from argparse import ArgumentParser
+		parser = ArgumentParser(description='Gather metrics from the ceph cluster and send them to influxDB via the HTTP API using the line protocol')
+		parser.add_argument('-c','--config', metAvar='FILE',dest='configPath')
+		options = parser.parse_args()
+	try:
+		if not (options['configPath'] == '' or options['configPath'] == None):
+
+			confPath = options['configPath']
+	except:
+		pass
+	return confPath
+
+
+def main(configFile=defaultConf):
 	def loadPlugin(uri):
 		#turn relative path into absolute path
 		uri = os.path.normpath(os.path.join(os.path.dirname(__file__), uri))
@@ -42,120 +73,108 @@ def main():
 		for i in xrange(0, len(points), size):
 			yield points[i:i + size]
 
-	#get location of configuration file
-	script_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-	rel_path = "conf/ceph-influxDB-metricsCollector.ini"
-	ini_file = os.path.join(script_dir, rel_path)
+	def parseConf(configFile):
+		#create logger for config file
+		logger = createLogger(os.path.join(script_dir,'logs/startup.log'))
+		#create array for plugins
+		plugins={}
+		options={}
+		try:
+			#set up the config parser
+			config = ConfigParser.ConfigParser()
+			config.readfp(open(configFile))
+			#try to read config file
+			#reporting
+			#create options dictionary
+			options['clusters']={}
+			for k,v in config.items('reporting'):
+				#split list of conf,keyring by comma
+				argList=v.split(',')
+				c=argList[0]
+				keyring=argList[1]
+				if c=='none':
+					c=None
+				if keyring=='none':
+					keyring=None
+				options['clusters'][k]={'conf':c,'keyring':keyring}
+			#hosts
+			options['host'] = config.get('connection','host')
+			options['port'] = config.get('connection','port')
+			#connection settings
+			options['db'] = config.get('connection','db')
+			options['user'] = config.get('connection','user')
+			options['password'] = config.get('connection','pass')
+			options['ssl'] = config.getboolean('connection','ssl')
+			options['verify_ssl'] = config.getboolean('connection','verify_ssl')
+			options['retention_policy'] = config.get('connection','retention_policy')
+			options['compresison_level'] = config.getint('connection','compresison_level')
+			options['batch_size'] = config.getint('connection','batch_size')
+			#load logging settings
+			options['loggingPath'] = config.get('logging','path')
+			options['loggingLevel'] = config.get('logging','level')
+			#load plugins
+			for k,v in config.items('plugins'):
+				#remove outer brackets
+				v=v[1:-1]
+				plugins[k]=set(v.split(','))
+		except Exception as e:
+			logger.critical('The' + configFile +' file is misconfigured. Cannot load configuration: {0}'.format(e))
+			#use default configuration
+			return parseConf(defaultConf)
+		#if retention policy se to 'none', set to None
+		if options['retention_policy'].lower() == 'none':
+			retention_policy=None
 
 
-	logger = logging.getLogger('ceph-influxDB-metricsCollector')
-	#set default logging in case it cannot read the config
-	loggingPath = os.path.join(script_dir,'logs/startup.log')
-	#set default logging level
-	loggingLevel = logging.INFO
-	handler = logging.FileHandler(loggingPath)
-	# create a logging format
-	formatter = logging.Formatter('[%(asctime)s] %(levelname)s: %(message)s')
-	handler.setFormatter(formatter)
-	# add the handlers to the logger
-	logger.addHandler(handler)
-	logger.setLevel(loggingLevel)
-	logger.propagate = False
+		#format the path into an absolute path to the directory of the log
+		if '[BaseDirectory]' in options['loggingPath']:
+			options['loggingPath'] = os.path.join(script_dir,options['loggingPath'][16:])
+
+		#format the value of level into the ENUM equivalent
+		if options['loggingLevel'] in ('DEBUG','INFO','WARNING','ERROR','CRITICAL'):
+			options['loggingLevel'] = logging.__getattribute__(options['loggingLevel'])
+		else:
+			#anything else set to default
+			logger.warning('Could not understand logging option: "{0}". Defaulting to level WARNING'.format(options['loggingLevel']))
+			options['loggingLevel'] = logging.WARNING
+
+		try:
+			#make path to the log file
+			options['loggingPath'] = os.path.join(options['loggingPath'],'ceph-influxDB-metricsCollector.log')
+			#get logger
+			logger = createLogger(options['loggingPath'],loggingLevel=options['loggingLevel'])
+		except Exception as e:
+			logger.critical('The' + configFile +' file is misconfigured. Cannot create logger: {0}'.format(e))
+			#Use default configurations
+			return parseConf(defaultConf)
+
+		return options, plugins, logger
+
+	def createLogger(loggingPath,loggingLevel=logging.INFO):
+		#create logger
+		logger = logging.getLogger('ceph-influxDB-metricsCollector')
+		#delete previous handlers]
+		for h in logger.handlers:
+			h.close()
+		logger.handlers=[]
+		#create handler for file
+		handler = logging.FileHandler(loggingPath)
+		# create a logging format
+		formatter = logging.Formatter('[%(asctime)s] %(levelname)s: %(message)s')
+		handler.setFormatter(formatter)
+		# add the handlers to the logger
+		logger.addHandler(handler)
+		logger.setLevel(loggingLevel)
+		logger.propagate = False
+		return logger
+
 	
 
-	#create array for plugins
-	plugins={}
-
-	#create variables for config
-	clusters = {}
-	host = ''
-	port = ''
-	db = ''
-	user = ''
-	password = ''
-	ssl=False
-	verify_ssl = False
-	retention_policy =''
-	time_precision = 'ms'
-
-	
-	try:
-		#set up the config parser
-		config = ConfigParser.ConfigParser()
-		config.readfp(open(ini_file))
-		#try to read config file
-		#reporting
-		for k,v in config.items('reporting'):
-			#split list of conf,keyring by comma
-			argList=v.split(',')
-			c=argList[0]
-			keyring=argList[1]
-			if c=='none':
-				c=None
-			if keyring=='none':
-				keyring=None
-			clusters[k]={'conf':c,'keyring':keyring}
-		#hosts
-		host = config.get('connection','host')
-		port = config.get('connection','port')
-		#connection settings
-		db = config.get('connection','db')
-		user = config.get('connection','user')
-		password = config.get('connection','pass')
-		ssl = config.getboolean('connection','ssl')
-		verify_ssl = config.getboolean('connection','verify_ssl')
-		retention_policy = config.get('connection','retention_policy')
-		compresison_level = config.getint('connection','compresison_level')
-		batch_size = config.getint('connection','batch_size')
-		#load logging settings
-		loggingPath = config.get('logging','path')
-		loggingLevel = config.get('logging','level')
-		#load plugins
-		for k,v in config.items('plugins'):
-			#remove outer brackets
-			v=v[1:-1]
-			plugins[k]=set(v.split(','))
-	except:
-		logger.critical('The ceph_tagging.ini file is misconfigured. Cannot load configuration.')
-		#stop the execution of the script: no point running it if it does not have plugins to run or a database to connect to
-		return
-
-	#if retention policy se to 'none', set to None
-	if retention_policy.lower() == 'none':
-		retention_policy=None
-
-
-	#format the path into an absolute path to the directory of the log
-	if '[BaseDirectory]' in loggingPath:
-		loggingPath = os.path.join(script_dir,loggingPath[16:])
-
-	#format the value of level into the ENUM equivalent
-	if loggingLevel in ('DEBUG','INFO','WARNING','ERROR','CRITICAL'):
-		loggingLevel = logging.__getattribute__(loggingLevel)
-	else:
-		#anything else set to default
-		logger.warning('Could not understand logging option: "{0}". Defaulting to level WARNING'.format(loggingLevel))
-		loggingLevel = logging.WARNING
-
-	handler.close()
-	logger.removeHandler(handler)
-	#make path to the log file
-	loggingPath = os.path.join(loggingPath,'ceph-influxDB-metricsCollector.log')
-	#change the default logger to use the options selected
-	handler = logging.FileHandler(loggingPath)
-	# create a logging format
-	handler.setFormatter(formatter)
-	#remove previous handlers
-	logger.handlers = []
-	# add the handlers to the logger
-	logger.addHandler(handler)
-	logger.setLevel(loggingLevel)
-	logger.propagate = False
-	
+	options, plugins, logger = parseConf(configFile)
 	logger.info('-----------------------Starting script------------------------')
 	#create empty list for all points
 	points=[]
-	for cluster,clusterDict in clusters.iteritems():
+	for cluster,clusterDict in options['clusters'].iteritems():
 		cache={}
 		#Make sure cache did not persist from previous run
 		reload(base)
@@ -200,25 +219,25 @@ def main():
 	try:
 		
 		#create connection to influxDB - see influxDB-python for more information
-		logger.info('Opening connection to "{0}:{1}" as "{2}" to database "{3}"'.format(host,port,user,db))
-		client = InfluxDBClient(host,port, user, password, db, ssl, verify_ssl)
+		logger.info('Opening connection to "{0}:{1}" as "{2}" to database "{3}"'.format(options['host'],options['port'],options['user'],options['db']))
+		client = InfluxDBClient(options['host'],options['port'], options['user'], options['password'], options['db'], options['ssl'], options['verify_ssl'])
 
 		#create parameters
-		params = {'db':db,'precision':'ms'}
+		params = {'db':options['db'],'precision':'ms'}
 
-		if retention_policy is not None:
-			params['rp'] = retention_policy
-		if batch_size ==0:
-			batch_size = len(points)
+		if options['retention_policy'] is not None:
+			params['rp'] = options['retention_policy']
+		if options['batch_size'] == 0:
+			options['batch_size'] = len(points)
 
-		for batch in make_batches(points,batch_size):
+		for batch in make_batches(points,options['batch_size']):
 			logger.info('Writing batch')
 			#make continous string from array
 			batch = '\n'.join(points)
 			#create a new string memory buffer as temporary file
 			f = cStringIO.StringIO()
 			#zip points into file
-			fzip = gzip.GzipFile(fileobj=f, mode="wb",compresslevel=compresison_level).write(batch)
+			fzip = gzip.GzipFile(fileobj=f, mode="wb",compresslevel=options['compresison_level']).write(batch)
 			#get size of file in bytes
 			size = f.tell()
 			#go back to start of file
@@ -240,9 +259,18 @@ def main():
 			f.close()
 		logger.info('Finished writing points')
 	except Exception as exc:
-		logger.critical('Failed to write points to "{0}:{1}" with options: time_precision:"{2}", retention_policy:"{3}" Error:"{4}" Traceback:"{5}"'.format(host,port,time_precision,retention_policy,exc,traceback.format_exc()))
-	logger.info('--------------------Finished executing all scripts----------------------------')
-	handler.close()
-	logger.removeHandler(handler)
+		logger.critical('Failed to write points to "{0}:{1}" with options: time_precision:"ms", retention_policy:"{2}" Error:"{3}" Traceback:"{4}"'.format(options['host'],options['port'],options['retention_policy'],exc,traceback.format_exc()))
+	#Dispose of handlers
+	for h in logger.handlers:
+		h.close()
+		logger.handlers=[]
+
+
+
+
+
+#Start main function if not initiated from outside script
 if __name__ == '__main__':
-   main()
+	#parse config arguments given in command line
+	confPath=parseArgs()
+  	main(confPath)

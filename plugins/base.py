@@ -1,10 +1,13 @@
 import traceback
-import logging
-import os 
+import logging 
 import collections
 import functools
 from  influxLineProtocol import createLineProtocolStatement
 import json
+import sys
+import subprocess
+
+versionInfo = sys.version_info
 
 mainCache = {}
 make_line = createLineProtocolStatement
@@ -77,7 +80,15 @@ class Base(object):
 				args.insert(2,self.clusterConf)
 		args=tuple(args)
 		try:
-			output = os.popen2(' '.join(args))[1].read()
+			if versionInfo[0] == 2 and versionInfo[1] <= 6:
+				# if version earlier or equal to 2.6.x, use subprocess.popen
+				process = subprocess.Popen(args,stdin=subprocess.PIPE,stdout=subprocess.PIPE,close_fds=True)
+				output = process.stdout.read()
+				process.terminate()
+			else:
+				# For newer versions use subprocess
+				output = subprocess.check_output(args,stdout=subprocess.PIPE)
+
 		except Exception as exc:
 			self.logger.error("Failed to execute command :: {0} :: {1}".format(exc, traceback.format_exc()))
 			return None
