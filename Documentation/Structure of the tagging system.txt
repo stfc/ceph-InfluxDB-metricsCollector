@@ -38,3 +38,33 @@ Type
 |	----Metric
 |
 --------------------------------------------------------------------
+
+The plugins use this system in order to allow easier use of these metrics with templating for grafana.
+
+How to find metrics:
+
+To find metrics, you should specify where the metric is coming from, using the Type tag.
+Once you have selected the type, you can narow down your search by including any of the tags listed under that section.
+Finally, you specify which metric you want to retrieve about that object using the metric tag. 
+All values are stored under the "value" column in the timeseries.
+
+For example, we want to retrieve the apply latency on osd 10.
+We would use the following tags:
+Type=OSD
+osd=10
+metric=apply_latency
+
+However, if we wanted to retrieve the average apply latency for all OSDs in a storage node, we would use these tags:
+Type=OSD
+host=sn1
+metric=apply_latency
+
+For grafana a good approach is to put in template variables for all tags except Type and Metric, so the viewer can narrow down their choice of statistics
+An example query woudl look like this:
+SELECT mean(value) FROM ceph-cluster WHERE type='osd' AND rack='$rack' AND host='$host' AND osd='$osd' AND metric='apply_latency' AND time > now() - 1h
+
+If you wish to let viewers select multiple racks, hosts and OSDs, you would set the templating to use regex values for multivalue and regex all for all selection and use in the query:
+SELECT mean(value) FROM ceph-cluster WHERE type='osd' AND rack=~ /^$rack$/ AND host=/^$rack$/ AND osd=/^$rack$/ AND metric='apply_latency' AND time > now() - 1h
+As you can see, it is important to use /^$var$/ in regex, as the ^ and $ makes sure you do not get all the tags containing this string.
+This problem mainly arises with OSD numbers, where by selecting 1, would result in regex selecting also 10,11,21 etc. 
+
