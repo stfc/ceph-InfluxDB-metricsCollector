@@ -6,6 +6,10 @@ class CephGeneralStatsPlugin(base.Base):
 		base.Base.__init__(self,cluster,cache,timestamp,c,k)
 
 	def gather_metrics(self):
+		'''
+		Subclassed method of base.py which is called by loader.py
+		Returns array of points collected by the plugin
+		'''
 		self.logger.info('Gathering metrics')
 		points=[]
 
@@ -19,6 +23,8 @@ class CephGeneralStatsPlugin(base.Base):
 
 	def get_storage_stats(self):
 		'''
+		Collects storage metrics about the cluster.
+		Returns array of points, formatted into the format of the line protocol
 		metrics collected:
 			-total_bytes
 			-total_used_bytes
@@ -52,6 +58,8 @@ class CephGeneralStatsPlugin(base.Base):
 
 	def get_quorum_stats(self):
 		'''
+		Collects monitor quorum metrics about the cluster.
+		Returns array of points, formatted into the format of the line protocol
 		metrics collected:
 			-mons_up
 			-quorum

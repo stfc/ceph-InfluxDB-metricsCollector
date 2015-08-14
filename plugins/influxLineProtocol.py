@@ -1,6 +1,11 @@
 import collections
 
 def createLineProtocolBatch(measurements):
+	'''
+	Makes a correctly formatted batch of points in accordance with the line protocol, from an array of measurement sin the format
+	{measurement:measurementName, tags:{},fields:{},timestamp:12345678}
+	Currently not being used
+	'''
 	batch = ''
 	for m in measurements:
 		batch = []
@@ -16,6 +21,10 @@ def createLineProtocolBatch(measurements):
 
 
 def createLineProtocolStatement(measurement,tags,valuesToWrite,timestamp=''):
+	'''
+	Formats the data into the line protocol
+	returns a string in accordance to the line protocol
+	'''
 	#These escape the values and measurements. They have been commented out as they cause 3+ extra seconds
 	#of execution time overall but do not actually change any values if values passed in are correctly constructed
 	'''
@@ -49,6 +58,13 @@ def createLineProtocolStatement(measurement,tags,valuesToWrite,timestamp=''):
 	return ''.join(protocolArray)
 
 def getValueStrings(fields):
+	'''
+	Creates the fields part of the line protocol
+	Formats a dictionary rntry of fields to the correct format:
+	string --> "string"
+	4 --> 4
+	returns string
+	'''
 	fieldsArray = []
 	for k,v in fields.iteritems():
 		field = [k,'=']
@@ -61,6 +77,10 @@ def getValueStrings(fields):
 	return ','.join(fieldsArray)
 
 def getTagStrings(tags):
+	'''
+	Formats the dictionary entry of tags to the correct line protocol format
+	returns string
+	'''
 	tagsArray=['']
 
 	for k,v in tags.iteritems():
@@ -72,11 +92,19 @@ def getTagStrings(tags):
 	return ''.join(tagsArray)
 
 def orderTags(d):
+	'''
+	Orders the tags in lexicographical order. This reduces the strain on the database.
+	returns ordered dictionary
+	'''
 	#order the tags into an ordered dictionary
 	od = collections.OrderedDict(sorted(d.items()))
 	return od
 
 def escapeTagDict(d):
+	'''
+	Escapes all of the keys and value of tags listed in the tags dictionary
+	returns dictionary
+	'''
 	#declare new dictionary to put the escaped tags in
 	nd={}
 	for k,v in d.iteritems():
@@ -87,6 +115,10 @@ def escapeTagDict(d):
 	return nd
 
 def escapeValueDict(d):
+	'''
+	Escapes illegal characters in field values and their keys. See influxDB for more information
+	returns dictionary
+	'''
 	#declare new dictionary to put the escaped fields in
 	nd={}
 	for k,v in d.iteritems():
@@ -98,12 +130,21 @@ def escapeValueDict(d):
 
 
 def escapeValues(s):
+	'''
+	Escapes illegal characters in field values. See influxDB for more information
+	returns string
+	'''
 	try:
 		return s.replace('"','\\\"')
 	except:
+		#if cannot replace means it is a number or float. Ignore exception. No need to format
 		return s
 
 def escapeCharacters(s):
+	'''
+	Escapes illegal characters in tag values, tag keys and measurements. See influxDB for more information
+	returns string
+	'''
 	try:
 		s = s.replace(' ', '\ ')
 		s = s.replace(',','\,')

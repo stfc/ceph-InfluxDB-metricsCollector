@@ -6,6 +6,10 @@ class CephPGPlugin(base.Base):
 		base.Base.__init__(self,cluster,cache,timestamp,c,k)
 
 	def gather_metrics(self):
+		'''
+		Subclassed method of base.py which is called by loader.py
+		Returns array of points collected by the plugin
+		'''
 		self.logger.info('Gathering metrics')
 		#get ids of pools and their corresponding names
 		poolIds = self.get_pool_names()

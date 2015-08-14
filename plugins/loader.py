@@ -13,13 +13,18 @@ import traceback
 import time
 import sys
 
-#get location of default configuration file
+#set default locations of configuration files
 script_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 rel_path = "conf/default.conf"
 defaultConf = os.path.join(script_dir, rel_path)
 expectedConf = '/etc/ceph-influxdb-metricsCollector.conf'
 
 def parseArgs():
+	'''
+	Parses the command line arguments given with the command.
+	Currently the arguments it looks for are:
+	-c and --config
+	'''
 	confPath = defaultConf
 	versionInfo = sys.version_info
 	if versionInfo[0] <= 6 and versionInfo[0] == 2:
@@ -44,7 +49,15 @@ def parseArgs():
 
 
 def main(configFile=defaultConf):
+	'''
+	Main function which gets the plugins, runs them and sends the resultant points to influxDB
+	'''
 	def loadPlugin(uri):
+		'''
+		imports the plugin from a relative URI
+		returns the loaded plugin on success
+		Returns None on failure
+		'''
 		#turn relative path into absolute path
 		uri = os.path.normpath(os.path.join(os.path.dirname(__file__), uri))
 		path, fname = os.path.split(uri)
@@ -70,11 +83,20 @@ def main(configFile=defaultConf):
 		return None
 
 	def make_batches(points, size):
+		'''
+		Creates batches of points to be zipped and sent to influxDB
+		'''
 		for i in xrange(0, len(points), size):
 			yield points[i:i + size]
 
 	def parseConf(configFile):
-		#create logger for config file
+		'''
+		Reads and parses the configuration file.
+		It also creates a reference to the logger created from the configuration file
+		Returns options, plugins, logger
+		If config file cannot be parsed, it loads the default config from conf/default.conf
+		'''
+		#create logger for startup file
 		logger = createLogger('/var/log/ceph-influxdb-metricsCollector-startup.log')
 		#create array for plugins
 		plugins={}
@@ -87,6 +109,7 @@ def main(configFile=defaultConf):
 			#reporting
 			#create options dictionary
 			options['clusters']={}
+			#for each cluster get array of configurationFile,keyringFile
 			for k,v in config.items('reporting'):
 				#split list of conf,keyring by comma
 				argList=v.split(',')
@@ -115,16 +138,16 @@ def main(configFile=defaultConf):
 			#load plugins
 			for k,v in config.items('plugins'):
 				#remove outer brackets
-				v=v[1:-1]
+				v=v.strip('[]')
 				plugins[k]=set(v.split(','))
 		except Exception as e:
 			logger.critical('The' + configFile +' file is misconfigured. Cannot load configuration: {0}'.format(e))
 			#use default configuration
 			return parseConf(defaultConf)
-		#if retention policy se to 'none', set to None
+
+		#if retention policy set to 'none', set to None
 		if options['retention_policy'].lower() == 'none':
 			retention_policy=None
-
 
 		#format the path into an absolute path to the directory of the log
 		if '[BaseDirectory]' in options['loggingPath']:
@@ -151,9 +174,13 @@ def main(configFile=defaultConf):
 		return options, plugins, logger
 
 	def createLogger(loggingPath,loggingLevel=logging.INFO):
+		'''
+		This function removes and closes all previous handlers and then creates a file handler for the logging file, assigns it to the logger, and returns a reference to the logger
+		Returns a reference to the logger class
+		'''
 		#create logger
 		logger = logging.getLogger('ceph-influxDB-metricsCollector')
-		#delete previous handlers]
+		#delete previous handlers
 		for h in logger.handlers:
 			h.close()
 		logger.handlers=[]
@@ -174,14 +201,17 @@ def main(configFile=defaultConf):
 	logger.info('-----------------------Starting script------------------------')
 	#create empty list for all points
 	points=[]
+	#for each cluster get the dictionary that contains keychain and configFile
 	for cluster,clusterDict in options['clusters'].iteritems():
-		cache={}
+		
 		#Make sure cache did not persist from previous run
+		cache={}
 		reload(base)
 		logger.info('Retrieving metrics from cluster "{0}"'.format(cluster))
+		#for each plugin get the set of clusters it should run on
 		for p,clusterSet in plugins.iteritems():
 			if cluster in clusterSet:
-				#load plugin
+				#load plugin and return reference to loaded module
 				plugin = loadPlugin(p)
 				if not plugin == None:
 					#find all classes in module
@@ -190,6 +220,7 @@ def main(configFile=defaultConf):
 					#iterate through classes in module to find classes that inherit from base.Base
 					for i in range(0,len(clsmembers)):
 						name,cls = clsmembers[i]
+						#check if class is a sub class of base
 						if issubclass(cls,base.Base):
 							try:
 								#create timestamp for plugin
@@ -224,12 +255,12 @@ def main(configFile=defaultConf):
 
 		#create parameters
 		params = {'db':options['db'],'precision':'ms'}
-
+		#set optional parameters
 		if options['retention_policy'] is not None:
 			params['rp'] = options['retention_policy']
 		if options['batch_size'] == 0:
 			options['batch_size'] = len(points)
-
+		#Create batches from points of specified size
 		for batch in make_batches(points,options['batch_size']):
 			logger.info('Writing batch')
 			#make continous string from array

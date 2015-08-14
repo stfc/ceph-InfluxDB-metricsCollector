@@ -63,8 +63,14 @@ class Base(object):
 		mainCache=cache
 		self.timestamp=timestamp
 
+
 	@memoized
 	def execute_command(self,returnJSON,*args):
+		'''
+		Executes the command passed in. If specified, it will convert output to JSON format
+		If the command is ceph related, it will add keychain and config file info.
+		If it cannot execute or convert the command form JSON, it will return None
+		'''
 		self.logger.debug('Command is not memorized')
 		#call command
 		self.logger.info('Executing command:{0}'.format(args))
@@ -103,6 +109,11 @@ class Base(object):
 
 	@memoized
 	def readJson(self,jsonFile):
+		'''
+		converts JSON into dictionaries.
+		If it cannot convert the JSON, it will return None
+
+		'''
 		self.logger.debug("JSON is not memorized")
 		#try reading json file
 		try:
@@ -113,14 +124,26 @@ class Base(object):
 			return None
 
 	def create_measurement(self,tags,fields):
+		'''
+		Encodes the tags and fields itno the influxDB line protocol.
+		This calls the function make_line in influxLineProtocol.py
+
+		'''
 		return make_line(self.cluster,tags,fields,self.timestamp)
 
 	def gather_metrics(self):
-		self.logger.warning('function has not been sub classed')
+		'''
+		This function is called by loader.py, and should be subclassed by the plugins.
+		This function should return an array of points, already formatted by the create_measurement function.
+		'''
+		self.logger.warning('function has not been subclassed')
 		return []
 
 	@memoized
 	def get_pool_names(self):
+		'''
+		This function creates and returns a dictionary associating pool names to pool ids in the format {poolID:poolName}
+		'''
 		#create a dicitonary of poolid-->poolname for conversion
 		output = self.execute_command(True,'ceph','osd','lspools','--format','json')
 

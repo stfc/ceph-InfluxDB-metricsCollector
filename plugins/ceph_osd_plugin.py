@@ -7,6 +7,10 @@ class CephPluginOSDStates(base.Base):
 		base.Base.__init__(self,cluster,cache,timestamp,c,k)
 
 	def gather_metrics(self):
+		'''
+		Subclassed method of base.py which is called by loader.py
+		Returns array of points collected by the plugin
+		'''
 		self.logger.info('Gathering metrics')
 
 		
@@ -22,6 +26,8 @@ class CephPluginOSDStates(base.Base):
 
 	def get_state_data(self,osdHierarchy):
 		'''
+		Collects state of the osds.
+		Returns array of points, formatted into the format of the line protocol
 		metrics collected:
 			-state
 		'''
@@ -55,6 +61,8 @@ class CephPluginOSDStates(base.Base):
 
 	def get_perf_data(self,osdHierarchy):
 		'''
+		Collects performance data of the osds.
+		Returns array of points, formatted into the format of the line protocol
 		metrics collected:
 			-apply_latency
 			-commit_latency
@@ -80,6 +88,8 @@ class CephPluginOSDStates(base.Base):
 
 	def get_storage_data(self,osdHierarchy):
 		'''
+		Collects storage data of the osds.
+		Returns array of points, formatted into the format of the line protocol
 		metrics collected:
 			-kb
 			-kb_used
@@ -110,6 +120,12 @@ class CephPluginOSDStates(base.Base):
 
 
 	def get_osd_hierarchy(self):
+		'''
+		Converts flat hierarchical tree into osds with their respective hosts and racks in format:
+		{osd:{rack:rackName.host:hostName}}
+		If osd does not have parent, None is put in place
+		returns dicitonary
+		'''
 		self.logger.info('Creating osd hierarchy')
 		#run ceph command
 		output = self.execute_command(True,'ceph','osd','tree','--format','json')

@@ -6,6 +6,10 @@ class SomePlugin(base.Base):
 		base.Base.__init__(self,cluster,cache,timestamp,c,k)
 
 	def gather_metrics(self):
+		'''
+		Subclassed method of base.py which is called by loader.py
+		Returns array of points collected by the plugin
+		'''
 		self.logger.info('Gathering metrics')
 		#run ceph command
 		output = self.execute_command(True,'ceph','osd','tree','--format','json')
