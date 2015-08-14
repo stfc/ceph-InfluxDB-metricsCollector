@@ -17,6 +17,7 @@ import sys
 script_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 rel_path = "conf/default.conf"
 defaultConf = os.path.join(script_dir, rel_path)
+expectedConf = '/etc/ceph-influxdb-metricsCollector.conf'
 
 def parseArgs():
 	confPath = defaultConf
@@ -36,10 +37,9 @@ def parseArgs():
 		options = parser.parse_args()
 	try:
 		if not (options['configPath'] == '' or options['configPath'] == None):
-
 			confPath = options['configPath']
 	except:
-		pass
+		confPath = expectedConf
 	return confPath
 
 
@@ -75,7 +75,7 @@ def main(configFile=defaultConf):
 
 	def parseConf(configFile):
 		#create logger for config file
-		logger = createLogger(os.path.join(script_dir,'logs/startup.log'))
+		logger = createLogger('/var/log/ceph-influxdb-metricsCollector-startup.log')
 		#create array for plugins
 		plugins={}
 		options={}
