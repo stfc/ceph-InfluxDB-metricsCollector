@@ -24,6 +24,7 @@ class CephPluginPoolData(base.Base):
 		points.extend(self.get_pool_storage_stats())
 		points.extend(self.get_pool_io_stats())
 		points.extend(self.get_pool_pg_data())
+		points.extend(self.get_pg_state_stats())
 
 		return points
 
@@ -104,8 +105,13 @@ class CephPluginPoolData(base.Base):
 					points.append(self.create_pool_measurement(poolName,self.poolDPType[poolName],stat,statValue))
 				except Exception as e:
 					self.logger.warning("Could not write point: {0}".format(e))
-				
-
+			
+			try:
+				#try and get recovery stats
+				for stat in ('recovering_objects_per_sec','recovering_bytes_per_sec'):
+					points.append(self.create_pool_measurement(poolName,self.poolDPType[poolName],stat,statValue))
+			except:
+				pass
 		return points
 
 	def get_pool_metadata(self):
@@ -168,6 +174,46 @@ class CephPluginPoolData(base.Base):
 			return []
 		return points
 
+	def get_pg_state_stats(self):
+		self.logger.info('Getting quorum metrics')
+		#run ceph command
+		output = self.execute_command(True,'ceph','pg','dump','--format','json')
+
+		if output == None:
+			self.logger.error('No output recieved from "ceph mon dump --format json"')
+			return []
+
+		points=[]
+		create_measurement=self.create_measurement
+
+		#get ids of pools and their corresponding names
+		poolIds = self.get_pool_names()
+		#count number of pgs in each state
+		pgStates={}
+
+		for pg in output['pg_stats']:
+			#Add state to overall count
+			state = pg['state']
+			pgID = pg['pgid']
+			poolName = poolIds[str(pgID.split('.')[0])]
+			try:
+				#See if state and pool already exist
+				pgStates[poolName][state]+=1
+			except KeyError:
+				try:
+					#if not, check pool exists
+					pgStates[poolName][state]=1
+				except KeyError:
+					#if not, create pool and state
+					pgStates[poolName]={state:1}
+
+		#Add to points the number of pgs in each statete
+		for pool,states in pgStates.iteritems():
+			for state,value in states.iteritems():
+				points.append(create_measurement(
+					{'type':'pg','pool':pool,'state':state},
+					{'value':value}))
+		return points
 
 
 	def create_pool_measurement(self, poolName, dataProtectionType, metricName, value):

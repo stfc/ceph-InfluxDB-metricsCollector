@@ -25,7 +25,7 @@ def parseArgs():
 	Currently the arguments it looks for are:
 	-c and --config
 	'''
-	confPath = defaultConf
+	confPath = expectedConf
 	versionInfo = sys.version_info
 	if versionInfo[0] <= 6 and versionInfo[0] == 2:
 		#if version is 2.6.x use optparse

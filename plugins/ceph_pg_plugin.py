@@ -76,23 +76,5 @@ class CephPGPlugin(base.Base):
 					{'type':'pg', 'pool':poolName,'pg':pgID,'state':state,'metric':stat},
 					{'value':statSums[stat]}))
 
-			#Add state to overall count
-			try:
-				#See if state and pool already exist
-				pgStates[poolName][state]+=1
-			except KeyError:
-				try:
-					#if not, check pool exists
-					pgStates[poolName][state]=1
-				except KeyError:
-					#if not, create pool and state
-					pgStates[poolName]={state:1}
-
-		#Add to points the number of pgs in each state
-		for pool,states in pgStates.iteritems():
-			for state,value in states.iteritems():
-				points.append(create_measurement(
-					{'type':'pg','pool':pool,'pg':'sum','state':state},
-					{'value':value}))
 
 		return points

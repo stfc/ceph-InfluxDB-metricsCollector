@@ -6,6 +6,7 @@ from  influxLineProtocol import createLineProtocolStatement
 import json
 import sys
 import subprocess
+import re
 
 versionInfo = sys.version_info
 
@@ -57,11 +58,21 @@ class Base(object):
 		self.cluster=cluster
 		self.clusterConf=c
 		self.clusterKey=k
+		self.clusterClientID=None
 		#get application self.logger
 		self.logger = logging.getLogger('ceph-influxDB-metricsCollector')
 		#set cache
 		mainCache=cache
 		self.timestamp=timestamp
+		if not self.clusterKey == None:
+			self.extractClientID()
+
+
+	def extractClientID(self):
+		with open(self.clusterKey,'r') as f:
+			data=f.read()
+		client = re.search('(?<=\[client.).*(?=\])',data)
+		self.clusterClientID=client.group(0)
 
 
 	@memoized
@@ -77,13 +88,17 @@ class Base(object):
 		output = ''
 		if args[0]=='ceph':
 			args=list(args)
-			#add path to key and config if non default is specified
+			#add path to key, config and id if non default is specified
+			if not self.clusterClientID==None:
+				args.insert(1,'--id')
+				args.insert(2,self.clusterClientID)
 			if not self.clusterKey==None:
 				args.insert(1,'-k')
 				args.insert(2,self.clusterKey)
 			if not self.clusterConf==None:
 				args.insert(1,'-c')
 				args.insert(2,self.clusterConf)
+
 		args=tuple(args)
 		try:
 			if versionInfo[0] == 2 and versionInfo[1] <= 6:
