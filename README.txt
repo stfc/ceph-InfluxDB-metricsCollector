@@ -25,6 +25,7 @@ Also please ensure python has these libraries:
 -cStringIO
 -time
 -sys
+-subprocess
 
 Furthermore, you will require a ceph keychain on the machine this script will be running on.
 
