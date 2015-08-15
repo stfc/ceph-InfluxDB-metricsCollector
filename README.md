@@ -29,6 +29,8 @@ Also please ensure python has these libraries:
 * time
 * sys
 * subprocess
+* argparse (if python version >= 2.7.x)
+* optparse (if python version <= 2.6.x)
 
 ######Furthermore, you will require a ceph keychain on the machine this script will be running on.
 
