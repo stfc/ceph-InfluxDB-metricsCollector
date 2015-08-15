@@ -73,4 +73,4 @@ Furthermore, please make sure your passed in values for fields can be formatted 
 N.B. when testing plugins and the source code is changed, but the change is not reflected when running it, please delete the script's corresponding .pyc file.
 
 To enable the plugin, just add into the config file under plugins:
-pluginName=True
+pluginName=[ceph-cluster]
