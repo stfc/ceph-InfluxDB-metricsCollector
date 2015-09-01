@@ -2,7 +2,7 @@ import collections
 
 def createLineProtocolBatch(measurements):
 	'''
-	Makes a correctly formatted batch of points in accordance with the line protocol, from an array of measurement sin the format
+	Makes a correctly formatted batch of points in accordance with the line protocol, from an array of measurements in the format
 	{measurement:measurementName, tags:{},fields:{},timestamp:12345678}
 	Currently not being used
 	'''
