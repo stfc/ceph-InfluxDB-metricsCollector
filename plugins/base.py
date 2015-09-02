@@ -3,7 +3,10 @@ import logging
 import collections
 import functools
 from  influxLineProtocol import createLineProtocolStatement
-import json
+try:
+	import simplejson as json
+except:
+	import json
 import sys
 import subprocess
 import re
