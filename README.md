@@ -4,13 +4,17 @@ By Ignacy Debicki
 ######This is a script to collect data about ceph and send it to influxDB >= v0.9.x
 
 ######Recommended python version of >=2.7
-######Has been tested and works correctly on verison 2.6.6, however, optimisations in the json module are not implemented, so parsing json files takes significantly longer.
+######Has been tested and works correctly on verison 2.6.6, however, optimisations in the json module are not implemented, so parsing json files takes significantly longer. If using version 2.6.x, it is highly recommended to also install simplejson.
+
 
 
 To run it has the following dependencies:
 
 * [influxdb-python](https://github.com/influxdb/influxdb-python)
   * [Requests](http://docs.python-requests.org/)
+
+Optional libraries for 2.6.x to speed up JSON processing:
+* [simplejson](https://github.com/simplejson/simplejson)
 
 Also please ensure python has these libraries:
 
