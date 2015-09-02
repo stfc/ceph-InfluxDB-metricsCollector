@@ -41,7 +41,7 @@ def parseArgs():
 		from argparse import ArgumentParser
 		parser = ArgumentParser(description='Gather metrics from the ceph cluster and send them to influxDB via the HTTP API using the line protocol')
 		parser.add_argument('-c','--config', metAvar='FILE',dest='configPath')
-		parser.add_argument('-t,','--time', dest='interval')
+		parser.add_argument('-i,','--interval', dest='interval')
 		options = parser.parse_args()
 	try:
 		if not (options['configPath'] == '' or options['configPath'] == None):
