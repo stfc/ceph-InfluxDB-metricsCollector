@@ -1,7 +1,7 @@
 ceph-influxDB-metricsCollector By Ignacy Debicki
 This is a script to collect data about ceph and send it to influxDB >= v0.9.x
 
-Recommended python version of >=2.6.7
+Recommended python version of >=2.7
 Has been tested and works correctly on verison 2.6.6, however, optimisations in the json module are not implemented, so parsing json files takes significantly longer.
 
 
