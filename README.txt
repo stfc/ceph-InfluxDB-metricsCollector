@@ -45,8 +45,13 @@ Installation & configuration:
 
 Defining alternative config file:
 
-You can define an alternative config file by using `/./loader.py -c path/to/config` or `/./runLoop.py -c path/to/config`
+You can define an alternative config file by using `plugins/./loader.py -c path/to/config` or `plugins/./runLoop.py -c path/to/config`
 Option `--config path/to/config` can also be used.
+
+Defining different intervals for runLoop.py:
+
+You can define a different minute interval by using `plugins/./runLoop.py -i intervalInMinutes`
+Option `—interval may also be used`
 
 
 Hotswapping plugins:

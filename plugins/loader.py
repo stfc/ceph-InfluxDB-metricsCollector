@@ -26,12 +26,14 @@ def parseArgs():
 	-c and --config
 	'''
 	confPath = expectedConf
+	interval = 60
 	versionInfo = sys.version_info
 	if versionInfo[0] <= 6 and versionInfo[0] == 2:
 		#if version is 2.6.x use optparse
 		from optparse import OptionParser
 		parser = OptionParser()
 		parser.add_option('-c','--config', dest='configPath',help='The FILE the config should be read from. By default reads from etc/ceph-influxDB-metricsCollector/ceph-influxDB-metricsCollector.conf',metavar='FILE')
+		parser.add_option('-i','--interval', dest='interval',help='The length of time between the running of plugins, given in minutes. By default is set to 1 minute')
 		options, args = parser.parse_args()
 		options=options.__dict__
 	else:
@@ -39,13 +41,20 @@ def parseArgs():
 		from argparse import ArgumentParser
 		parser = ArgumentParser(description='Gather metrics from the ceph cluster and send them to influxDB via the HTTP API using the line protocol')
 		parser.add_argument('-c','--config', metAvar='FILE',dest='configPath')
+		parser.add_argument('-i,','--interval', dest='interval')
 		options = parser.parse_args()
 	try:
 		if not (options['configPath'] == '' or options['configPath'] == None):
 			confPath = options['configPath']
 	except:
 		confPath = expectedConf
-	return confPath
+	try:
+		if not (options['interval'] == '' or options['interval'] == None):
+			interval = int(options['interval'])*60
+	except:
+		interval=60
+
+	return confPath, interval
 
 
 def main(configFile=defaultConf):
@@ -141,7 +150,7 @@ def main(configFile=defaultConf):
 				v=v.strip('[]')
 				plugins[k]=set(v.split(','))
 		except Exception as e:
-			logger.critical('The' + configFile +' file is misconfigured. Cannot load configuration: {0}'.format(e))
+			logger.critical('The' + str(configFile) +' file is misconfigured. Cannot load configuration: {0}'.format(e))
 			#use default configuration
 			return parseConf(defaultConf)
 
@@ -303,5 +312,5 @@ def main(configFile=defaultConf):
 #Start main function if not initiated from outside script
 if __name__ == '__main__':
 	#parse config arguments given in command line
-	confPath=parseArgs()
+	confPath=parseArgs()[0]
   	main(confPath)
