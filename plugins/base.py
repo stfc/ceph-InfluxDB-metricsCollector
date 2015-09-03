@@ -105,7 +105,7 @@ class Base(object):
 		args=tuple(args)
 		try:
 			if versionInfo[0] == 2 and versionInfo[1] <= 6:
-				# if version earlier or equal to 2.6.x, use subprocess.popen
+				# if version earlier or equal to 2.6.x, use subprocess.Popen
 				process = subprocess.Popen(args,stdin=subprocess.PIPE,stdout=subprocess.PIPE,close_fds=True)
 				output = process.stdout.read()
 				process.terminate()
