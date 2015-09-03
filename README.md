@@ -55,7 +55,7 @@ Option `--config path/to/config` can also be used.
 ###Defining different intervals for runLoop.py:
 
 You can define a different minute interval by using `plugins/./runLoop.py -i intervalInMinutes`
-Option `—interval may also be used`
+Option `—interval` may also be used
 
 ##Hotswapping plugins:
 
