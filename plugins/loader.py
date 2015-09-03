@@ -33,7 +33,7 @@ def parseArgs():
 		from optparse import OptionParser
 		parser = OptionParser()
 		parser.add_option('-c','--config', dest='configPath',help='The FILE the config should be read from. By default reads from etc/ceph-influxDB-metricsCollector/ceph-influxDB-metricsCollector.conf',metavar='FILE')
-		parser.add_option('-t','--time', dest='interval',help='The length of time between the running of plugins, given in minutes. By default is set to 1 minute')
+		parser.add_option('-i','--interval', dest='interval',help='The length of time between the running of plugins, given in minutes. By default is set to 1 minute')
 		options, args = parser.parse_args()
 		options=options.__dict__
 	else:
@@ -150,7 +150,7 @@ def main(configFile=defaultConf):
 				v=v.strip('[]')
 				plugins[k]=set(v.split(','))
 		except Exception as e:
-			logger.critical('The' + configFile +' file is misconfigured. Cannot load configuration: {0}'.format(e))
+			logger.critical('The' + str(configFile) +' file is misconfigured. Cannot load configuration: {0}'.format(e))
 			#use default configuration
 			return parseConf(defaultConf)
 
@@ -312,5 +312,5 @@ def main(configFile=defaultConf):
 #Start main function if not initiated from outside script
 if __name__ == '__main__':
 	#parse config arguments given in command line
-	confPath=parseArgs()
+	confPath=parseArgs()[0]
   	main(confPath)
