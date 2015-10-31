@@ -87,7 +87,7 @@ def main(configFile=defaultConf):
 			try:
 				return imp.load_source(mname, no_ext + '.py')
 			except Exception as e:
-				logger.info('Could not load the .py file:{0}'.format(e))
+				logger.warning('Could not load the .py file:{0}'.format(e))
 				pass
 		return None
 
