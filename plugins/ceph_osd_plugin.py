@@ -122,7 +122,7 @@ class CephPluginOSDStates(base.Base):
 	def get_osd_hierarchy(self):
 		'''
 		Converts flat hierarchical tree into osds with their respective hosts and racks in format:
-		{osd:{rack:rackName.host:hostName}}
+		{osd:{rack:rackName,host:hostName}}
 		If osd does not have parent, None is put in place
 		returns dicitonary
 		'''
