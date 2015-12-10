@@ -39,7 +39,7 @@ Installation & configuration:
 
 1.Download this repository wherever you want to have it.
 2.Configure the default settings you would like to use if reading a config file fails using the single `default.conf` config file
-3.Copy `default.conf` to `/etc/ceph-influxDB-metricsCollector.conf`, and configure your normal configuration.
+3.Copy `default.conf` to `/etc/ceph-influxdb-metricsCollector.conf`, and configure your normal configuration.
 4.Make sure the user the scripts are going to be ran by can read and write in the desired log location and the plugins directory in the package.
 5.Schedual the loader.py to run at your desired interval by creating a CRON job. For testing, you can just run plugins/./runLoop.py, which will run the scripts at the start of every minute. For one time runs, you can use plugins/./loader.py
 
