@@ -143,7 +143,7 @@ class Base(object):
 
 	def create_measurement(self,tags,fields):
 		'''
-		Encodes the tags and fields itno the influxDB line protocol.
+		Encodes the tags and fields into the influxDB line protocol.
 		This calls the function make_line in influxLineProtocol.py
 
 		'''
