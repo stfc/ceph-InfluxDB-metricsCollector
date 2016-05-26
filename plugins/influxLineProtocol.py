@@ -6,10 +6,9 @@ def createLineProtocolBatch(measurements):
 	{measurement:measurementName, tags:{},fields:{},timestamp:12345678}
 	Currently not being used
 	'''
-	batch = ''
+	batch = []
+	append = batch.append
 	for m in measurements:
-		batch = []
-		append = batch.append
 		try:
 			#see if it contains timestamp
 			append(createLineProtocolStatement(m['measurement'],m['tags'],m['fields'],m['timestamp']))
