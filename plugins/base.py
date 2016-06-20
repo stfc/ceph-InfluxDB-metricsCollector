@@ -111,7 +111,7 @@ class Base(object):
 				process.terminate()
 			else:
 				# For newer versions use subprocess
-				output = subprocess.check_output(args,stdout=subprocess.PIPE)
+				output = subprocess.check_output(args,stdin=subprocess.PIPE,close_fds=True)
 
 		except Exception as exc:
 			self.logger.error("Failed to execute command :: {0} :: {1}".format(exc, traceback.format_exc()))
